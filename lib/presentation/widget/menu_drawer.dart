@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:invefacturacion/utils/drawer.dart';
+import 'package:invefacturacion/provider/drawer.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
@@ -8,9 +8,9 @@ class WidgetMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final drawerState = Provider.of<DrawerState>(context);
+    final drawerState = context.watch<DrawerState>();
     final ScrollController scrollController = ScrollController(); // Controlador del Scroll
-
+    bool isDarkMode = Theme.of(context).brightness == Brightness.dark;
     Widget buildMenuItem(IconData icon, String title, int index, String route) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
@@ -24,15 +24,15 @@ class WidgetMenu extends StatelessWidget {
             borderRadius: BorderRadius.circular(10),
           ),
           child: ListTile(
-            leading: Icon(icon, color: Colors.blue),
+            leading: Icon(icon, color: isDarkMode ? Colors.white : Colors.blue,),
             title: Text(
               title,
-              style: const TextStyle(
-                color: Colors.black87,
+              style:  TextStyle(
+                color: isDarkMode ? Colors.white : Colors.black87,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            trailing: const Icon(Icons.chevron_right, color: Colors.blue),
+            trailing:  Icon(Icons.chevron_right, color: isDarkMode ? Colors.white : Colors.blue),
             onTap: () {
               drawerState.updateSelectOption(index);
               Navigator.pushNamed(context, route);

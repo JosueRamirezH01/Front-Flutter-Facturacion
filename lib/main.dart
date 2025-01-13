@@ -9,14 +9,28 @@ import 'package:invefacturacion/presentation/home/producto/productos_page.dart';
 import 'package:invefacturacion/presentation/home/venta/nueva_venta/nueva_venta_page.dart';
 import 'package:invefacturacion/presentation/home/venta/venta_page.dart';
 import 'package:invefacturacion/presentation/login/login_page.dart';
-import 'package:invefacturacion/utils/drawer.dart';
+import 'package:invefacturacion/provider/provider_principal.dart';
+import 'package:invefacturacion/provider/drawer.dart';
+import 'package:invefacturacion/provider/themes.dart';
 import 'package:provider/provider.dart';
 
 import 'presentation/home/configuracion/configuracion_page.dart';
 
 
 void main() async {
-  runApp(const MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+  final themeProvider = ThemeProvider(); // Inicializamos el ThemeProvider
+  await themeProvider.loadThemeFromPreferences(); // Cargamos el tema guardado
+
+  runApp(
+    MultiProvider(
+      providers: Providers.providers,
+      child: ChangeNotifierProvider(
+        create: (_) => themeProvider,
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -25,26 +39,28 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => DrawerState(),
-      child: MaterialApp(
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+      return MaterialApp(
         title: 'Flutter Demo',
-       debugShowCheckedModeBanner: false,
-          initialRoute: 'dashboard',
-          routes: {
-            'login': (_) => LoginPage(),
-            'dashboard': (_) => Dashboard(),
-            'inventario':(_) => ProductoPage(),
-            'cliente':(_) => ClientePage(),
-            'perfil':(_) => PerfilPage(),
-            'compra':(_) => CompraPage(),
-            'gasto':(_) => GastosPage(),
-            'configuracion':(_) => ResponsiveLayout(),
-            'caja':(_)=> CajaPage(),
-            'venta':(_) => VentaPage(),
-            'nueva_venta':(_)=>NuevaVentaPage()
-          }
-      ),
+        debugShowCheckedModeBanner: false,
+        theme: themeProvider.currentTheme,
+        initialRoute: 'dashboard',
+        routes: {
+          'login': (_) => LoginPage(),
+          'dashboard': (_) => Dashboard(),
+          'inventario': (_) => ProductoPage(),
+          'cliente': (_) => ClientePage(),
+          'perfil': (_) => PerfilPage(),
+          'configuracion': (_) => ConfiguracionPage(),
+          'compra': (_) => CompraPage(),
+          'gasto': (_) => GastosPage(),
+          'caja': (_) => CajaPage(),
+          'venta': (_) => VentaPage(),
+          'nueva_venta': (_) => NuevaVentaPage(),
+        },
+      );
+      }
     );
   }
 }

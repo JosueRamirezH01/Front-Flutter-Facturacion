@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:invefacturacion/presentation/components/textFormField.dart';
 import 'package:invefacturacion/presentation/home/venta/nueva_venta/nueva_venta_controller.dart';
+import 'package:invefacturacion/presentation/widget/CustomMessage.dart';
 import '../../../../data/model/cliente.dart';
 import '../../../../data/model/producto.dart';
 
@@ -23,6 +24,9 @@ class _NuevaVentaPageState extends State<NuevaVentaPage> {
   DateTime _selectedDate = DateTime.now();
   final NuevaVentaController _con = NuevaVentaController();
   late double total = 0.0;
+  bool messagueFactura = false;
+
+  String? _selectedOption = 'Boleta';
   @override
   void initState() {
     super.initState();
@@ -53,6 +57,37 @@ class _NuevaVentaPageState extends State<NuevaVentaPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Radio<String>(
+                        value: 'Boleta',
+                        groupValue: _selectedOption,
+                        onChanged: (value) {
+                            _selectedOption = value;
+                            messagueFactura = false;
+                         refresh();
+                          print('object $_selectedOption');
+                        },
+                      ),
+                      Text('Boleta'),
+                      Spacer(),
+                      Radio<String>(
+                        value: 'Factura',
+                        groupValue: _selectedOption,
+                        onChanged: (value) {
+                            _selectedOption = value;
+                            messagueFactura = true;
+                            refresh();
+                          print('object $_selectedOption');
+                        },
+                      ),
+                      Text('Factura'),
+                    ],
+                  ),
+                ),
+                Divider(),
                 CustomDropdown<Producto>.search(
                   hintText: 'Seleccionar producto',
                   items: _con.producto,
@@ -116,7 +151,7 @@ class _NuevaVentaPageState extends State<NuevaVentaPage> {
                           ),
                           elevation: 4,
                           child: ListTile(
-                            leading: const Icon(Icons.shopping_cart, color: Colors.green, size: 30),
+                            leading: const Icon(Icons.shopping_cart, color: Colors.green, size: 25),
                             title: Text(
                               compra.name ?? '',
                               style: const TextStyle(
@@ -184,13 +219,19 @@ class _NuevaVentaPageState extends State<NuevaVentaPage> {
                       },
                     ),
                   ),
+                if(_productosSeleccionados.isEmpty)
+                  Center( child: Text('No hay productos',style: TextStyle(
+                    fontSize: 16.0,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.bold,
+                  ),),),
                 const Divider(),
                 const SizedBox(height: 10),
                 Row(
                   children: [
                     const Expanded(flex: 2,child: Text('Total', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),)),
                     const Spacer(),
-                    Expanded(flex: 1,child: Text(total.toStringAsFixed(2), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)))
+                    Expanded(flex: 2,child: Text(total.toStringAsFixed(2), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)))
                   ],
                 ),
                 const SizedBox(height: 10),
@@ -205,29 +246,14 @@ class _NuevaVentaPageState extends State<NuevaVentaPage> {
                   excludeSelected: false,
                   onChanged: (Cliente? value) {
                     if (value != null) {
+                      messagueFactura = false;
                     }
+                    refresh();
                   },
                 ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: _selectedDocumento,
-                  items: const [
-                    DropdownMenuItem(value: 'Factura', child: Text('Factura')),
-                    DropdownMenuItem(value: 'Boleta', child: Text('Boleta')),
-                  ],
-                  decoration: const InputDecoration(
-                    labelText: 'Documento',
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedDocumento = value;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
+                if(messagueFactura || _con.nombreClienteSingle == null)
+                CustomMessage(message: 'Se necesita tener un cliente por ser FACTURA', isPositive: false),
+                const SizedBox(height: 10),
                 InkWell(
                   onTap: _pickDate,
                   child: InputDecorator(
@@ -259,7 +285,7 @@ class _NuevaVentaPageState extends State<NuevaVentaPage> {
 
   void _agregarProducto() {
     if (_cantidadController.text.isEmpty || _precioController.text.isEmpty) {
-      _showSnackbar('Por favor, complete todos los campos');
+      _showSnackbar('Por favor, complete todos los campos del producto');
       return;
     }
 
@@ -305,7 +331,7 @@ class _NuevaVentaPageState extends State<NuevaVentaPage> {
   }
 
   bool _validateForm() {
-    if (_clienteController.text.isEmpty ||
+    if (_productosSeleccionados.isEmpty ||
         _totalController.text.isEmpty ||
         _selectedDocumento == null) {
       _showSnackbar('Por favor complete todos los campos');
