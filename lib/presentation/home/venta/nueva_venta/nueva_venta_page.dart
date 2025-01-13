@@ -283,7 +283,7 @@ class _NuevaVentaPageState extends State<NuevaVentaPage> {
         _cantidadController.clear();
         _precioController.clear();
       } else {
-        _showSnackbar('Seleccione un producto válido');
+        _showSnackbar('Seleccione un producto válido por favor');
       }
     } else {
       _showSnackbar('Ingrese valores válidos');
